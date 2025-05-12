@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBooks Canada | Modern Accounting Software</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://quickbooks.intuit.com/favicon.ico">
+    <style>
+        :root {
+            --qb-green: #2CA01C;
+            --qb-dark-green: #1F7D14;
+            --qb-light-green: #E8F5E9;
+            --qb-white: #FFFFFF;
+            --qb-black: #121212;
+            --qb-gray: #F5F5F5;
+            --qb-dark-gray: #333333;
+            --qb-blue: #0077C5;
+            --qb-gradient: linear-gradient(135deg, #2CA01C 0%, #0077C5 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--qb-dark-gray);
+            background-color: var(--qb-white);
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+        
+        /* Questionnaire container */
+        .questionnaire-container {
+            display: block;
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+        
+        /* Main content - hidden initially */
+        .main-content {
+            display: none;
+        }
+        
+        /* Show when questionnaire is completed */
+        .main-content.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Continue button styling */
+        #continueBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Rest of your existing CSS remains unchanged */
+        .scroll-container {
+            min-height: 100vh;
+            transform-style: preserve-3d;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: rgba(255,255,255,0.95);
+            box-shadow: 0 5px 30px rgba(0,0,0,0.05);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            transform: translateZ(50px);
+        }
+        
+        .logo img {
+            height: 28px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover img {
+            transform: scale(1.05);
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--qb-black);
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-menu a:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--qb-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            color: var(--qb-green);
+        }
+        
+        .nav-menu a:hover:after {
+            width: 100%;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: none;
+            outline: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--qb-green);
+            color: var(--qb-green);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(44, 160, 28, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 160, 28, 0.2);
+        }
+        
+        .btn-solid {
+            background: var(--qb-green);
+            color: white;
+        }
+        
+        .btn-solid:hover {
+            background: var(--qb-dark-green);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(44, 160, 28, 0.3);
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+            transform: translateZ(30px);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            background: var(--qb-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            color: var(--qb-dark-gray);
+            max-width: 500px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .hero-image {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%) translateZ(20px);
+            width: 50%;
+            max-width: 700px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            transition: transform 0.5s ease;
+        }
+        
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .hero-image:hover {
+            transform: translateY(-50%) translateZ(30px) rotateY(5deg);
+        }
+        
+        .hero-image:hover img {
+            transform: scale(1.03);
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(44, 160, 28, 0.1);
+            filter: blur(60px);
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            bottom: 10%;
+            right: 15%;
+            animation-delay: 2s;
+            background: rgba(0, 119, 197, 0.1);
+        }
+        
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            50% {
+                transform: translateY(-50px) translateX(50px);
+            }
+        }
+        
+        .business-selection {
+            padding: 120px 5%;
+            background-color: var(--qb-white);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            transform: translateZ(20px);
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--qb-black);
+        }
+        
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--qb-dark-gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+        
+        .option-card {
+            background: var(--qb-white);
+            border-radius: 16px;
+            padding: 40px 30px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--qb-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        
+        .option-card:hover:before {
+            transform: scaleX(1);
+        }
+        
+        .option-card icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 20px;
+            color: var(--qb-green);
+        }
+        
+        .option-card h3 {
+            color: var(--qb-black);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .option-card p {
+            color: var(--qb-dark-gray);
+            line-height: 1.6;
+        }
+        
+        .features {
+            padding: 120px 5%;
+            background-color: var(--qb-gray);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            background: var(--qb-white);
+            border-radius: 16px;
+            padding: 40px;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) rotateY(5deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            color: var(--qb-green);
+        }
+        
+        .feature-card h3 {
+            color: var(--qb-black);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card p {
+            color: var(--qb-dark-gray);
+            line-height: 1.6;
+        }
+        
+        .testimonials {
+            padding: 120px 5%;
+            background: var(--qb-gradient);
+            color: var(--qb-white);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        
+        .testimonial-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            position: relative;
+            transform: translateZ(30px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .testimonial-text {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .testimonial-text:before {
+            content: '"';
+            position: absolute;
+            top: -30px;
+            left: -30px;
+            font-size: 5rem;
+            opacity: 0.2;
+        }
+        
+        .testimonial-author {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .cta-section {
+            padding: 120px 5%;
+            text-align: center;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--qb-white);
+            border-radius: 20px;
+            padding: 80px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            transform: translateZ(40px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-content:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--qb-gradient);
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--qb-black);
+        }
+        
+        .cta-section p {
+            font-size: 1.2rem;
+            color: var(--qb-dark-gray);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .footer {
+            background-color: var(--qb-black);
+            color: var(--qb-white);
+            padding: 80px 5% 40px;
+            transform-style: preserve-3d;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+        
+        .footer-column h3 {
+            color: var(--qb-white);
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .footer-column a {
+            display: block;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-column a:hover {
+            color: var(--qb-white);
+            transform: translateX(5px);
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social-icons a {
+            color: var(--qb-white);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            transform: translateY(-3px);
+            color: var(--qb-green);
+        }
+        
+        [data-scroll] {
+            opacity: 0;
+            transition: all 1s ease;
+            transform: translateY(50px);
+        }
+        
+        [data-scroll="in"] {
+            opacity: 1;
+            transform: translateY(0) translateZ(0);
+        }
+        
+        .question-block {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 40px;
+            background: var(--qb-white);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+        }
+        
+        .question-block h3 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: var(--qb-black);
+        }
+        
+        @media (max-width: 1024px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .hero-image {
+                width: 60%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 5%;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 100px;
+                padding-bottom: 60px;
+            }
+            
+            .hero-content {
+                margin-bottom: 60px;
+            }
+            
+            .hero-image {
+                position: relative;
+                right: auto;
+                top: auto;
+                transform: none;
+                width: 100%;
+                margin-top: 40px;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .section-header h2 {
+                font-size: 2rem;
+            }
+            
+            .question-block {
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .testimonial-card {
+                padding: 40px 30px;
+            }
+            
+            .testimonial-text {
+                font-size: 1.2rem;
+            }
+            
+            .cta-content {
+                padding: 50px 30px;
+            }
+            
+            .cta-section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <img src="https://quickbooks.intuit.com/contents/v2/images/logo-quickbooks.svg" alt="QuickBooks Logo">
+        </div>
+        <nav class="nav-menu">
+            <a href="#">Products</a>
+            <a href="#">Pricing</a>
+            <a href="#">How It Works</a>
+            <a href="#">Resources</a>
+        </nav>
+        <div class="auth-buttons">
+            <button class="btn btn-outline">Sign In</button>
+            <button class="btn btn-solid">Try It Free</button>
+        </div>
+    </header>
+
+    <!-- Questionnaire Container (shown first) -->
+    <div class="questionnaire-container">
+        <!-- Business Questionnaire Section -->
+        <section class="business-selection">
+            <div class="section-header" data-scroll>
+                <h2>To help us tailor QuickBooks for your business...</h2>
+                <p>Answer a few quick questions to customize your experience.</p>
+            </div>
+            
+            <div class="question-block" data-scroll>
+                <h3>What best describes your primary business type? (Required)</h3>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q1" style="margin-right: 10px;" type="radio" value="Freelancer/Solopreneur" required/>
+                    Freelancer/Solopreneur
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q1" style="margin-right: 10px;" type="radio" value="Service-Based Business"/>
+                    Service-Based Business
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q1" style="margin-right: 10px;" type="radio" value="E-commerce/Online Retail"/>
+                    E-commerce/Online Retail
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q1" style="margin-right: 10px;" type="radio" value="Small Business with Employees"/>
+                    Small Business with Employees
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q1" style="margin-right: 10px;" type="radio" value="Other (please specify)"/>
+                    Other (please specify)
+                </label>
+            </div>
+            
+            <div class="question-block" data-scroll>
+                <h3>Which of these do you currently use most for managing your business? (Select all that apply)</h3>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q2" style="margin-right: 10px;" type="checkbox" value="Payment Processors"/>
+                    Payment Processors
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q2" style="margin-right: 10px;" type="checkbox" value="E-commerce Platforms"/>
+                    E-commerce Platforms
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q2" style="margin-right: 10px;" type="checkbox" value="CRM Systems"/>
+                    CRM Systems
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q2" style="margin-right: 10px;" type="checkbox" value="Payroll Software"/>
+                    Payroll Software
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q2" style="margin-right: 10px;" type="checkbox" value="Other (please specify)"/>
+                    Other (please specify)
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q2" style="margin-right: 10px;" type="checkbox" value="None of the above"/>
+                    None of the above
+                </label>
+            </div>
+            
+            <div class="question-block" data-scroll>
+                <h3>What is your biggest accounting challenge or goal right now that QuickBooks can help you with? (Required)</h3>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q3" style="margin-right: 10px;" type="radio" value="Getting started and staying organized." required/>
+                    Getting started and staying organized.
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q3" style="margin-right: 10px;" type="radio" value="Tracking expenses and deductions."/>
+                    Tracking expenses and deductions.
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q3" style="margin-right: 10px;" type="radio" value="Managing cash flow and invoicing."/>
+                    Managing cash flow and invoicing.
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q3" style="margin-right: 10px;" type="radio" value="Preparing for taxes."/>
+                    Preparing for taxes.
+                </label>
+                <label style="display: block; margin: 10px 0;">
+                    <input name="q3" style="margin-right: 10px;" type="radio" value="Other (please specify)"/>
+                    Other (please specify)
+                </label>
+            </div>
+        </section>
+
+        <!-- Business Type Selection -->
+        <section class="business-selection">
+            <div class="section-header" data-scroll>
+                <h2>What kind of business are you building?</h2>
+                <p>Select the option that best describes your business to see customized solutions</p>
+            </div>
+            
+            <div class="option-grid">
+                <div class="option-card" data-scroll>
+                    <icon>🚀</icon>
+                    <h3>Just Starting Out</h3>
+                    <p>Launching my business with the right financial foundation</p>
+                </div>
+                
+                <div class="option-card" data-scroll>
+                    <icon>👥</icon>
+                    <h3>Managing a Team</h3>
+                    <p>Payroll, time tracking, and benefits management</p>
+                </div>
+                
+                <div class="option-card" data-scroll>
+                    <icon>🛒</icon>
+                    <h3>Selling Online</h3>
+                    <p>Ecommerce, inventory, and sales tax solutions</p>
+                </div>
+                
+                <div class="option-card" data-scroll>
+                    <icon>💻</icon>
+                    <h3>Freelancer</h3>
+                    <p>Simple invoicing, expenses, and tax tracking</p>
+                </div>
+                
+                <div class="option-card" data-scroll>
+                    <icon>💸</icon>
+                    <h3>Get Paid Faster</h3>
+                    <p>Cash flow, invoicing, and payment solutions</p>
+                </div>
+                
+                <div class="option-card" data-scroll>
+                    <icon>📝</icon>
+                    <h3>Tax Simplified</h3>
+                    <p>Deductions, reports, and filing made easy</p>
+                </div>
+            </div>
+            
+            <button id="continueBtn" class="btn btn-solid continue-btn" disabled>Continue to QuickBooks</button>
+        </section>
+    </div>
+
+    <!-- Main Content (hidden initially) -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <section class="hero scroll-container">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+            
+            <div class="hero-content" data-scroll>
+                <h1>Accounting that works as hard as you do</h1>
+                <p>Join over 7 million businesses using QuickBooks to save time, stay organized, and get paid faster with our modern accounting solutions.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-solid">Start Free Trial</button>
+                    <button class="btn btn-outline">Watch Demo</button>
+                </div>
+            </div>
+            
+            <div class="hero-image" data-scroll>
+                <img src="https://quickbooks.intuit.com/content/dam/intuit/quickbooks/desktop/screenshots/hero-screenshot-qbd.png" alt="QuickBooks Dashboard">
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="section-header" data-scroll>
+                <h2>Everything You Need to Run Your Business</h2>
+                <p>From invoicing to expense tracking, QuickBooks has you covered</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card" data-scroll>
+                    <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
+                    <h3>Easy Invoicing</h3>
+                    <p>Create professional invoices in seconds and get paid faster with online payments.</p>
+                </div>
+                
+                <div class="feature-card" data-scroll>
+                    <div class="feature-icon"><i class="fas fa-receipt"></i></div>
+                    <h3>Expense Tracking</h3>
+                    <p>Snap photos of receipts and automatically track expenses on the go.</p>
+                </div>
+                
+                <div class="feature-card" data-scroll>
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Real-Time Reports</h3>
+                    <p>See how your business is performing with profit and loss statements.</p>
+                </div>
+                
+                <div class="feature-card" data-scroll>
+                    <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                    <h3>Time Tracking</h3>
+                    <p>Track billable hours and easily add them to invoices.</p>
+                </div>
+                
+                <div class="feature-card" data-scroll>
+                    <div class="feature-icon"><i class="fas fa-user-tie"></i></div>
+                    <h3>Payroll</h3>
+                    <p>Run payroll in minutes with automatic tax calculations.</p>
+                </div>
+                
+                <div class="feature-card" data-scroll>
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Mobile App</h3>
+                    <p>Manage your business anytime, anywhere with our mobile app.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="testimonials">
+            <div class="testimonial-card" data-scroll>
+                <p class="testimonial-text">QuickBooks has transformed how we manage our finances. The intuitive interface and powerful features save us hours every week, allowing us to focus on growing our business instead of paperwork.</p>
+                <p class="testimonial-author">- Sarah Johnson, Founder of Bloom Design Studio</p>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="cta-content" data-scroll>
+                <h2>Ready to Simplify Your Business Finances?</h2>
+                <p>Try QuickBooks free for 30 days. No credit card required.</p>
+                <button class="btn btn-solid" style="padding: 15px 40px; font-size: 1.1rem;">Start Your Free Trial</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-grid">
+                <div class="footer-column" data-scroll>
+                    <h3>Products</h3>
+                    <a href="#">QuickBooks Online</a>
+                    <a href="#">QuickBooks Desktop</a>
+                    <a href="#">QuickBooks Payroll</a>
+                    <a href="#">QuickBooks Time</a>
+                    <a href="#">QuickBooks Payments</a>
+                </div>
+                
+                <div class="footer-column" data-scroll>
+                    <h3>Industries</h3>
+                    <a href="#">Retail</a>
+                    <a href="#">Construction</a>
+                    <a href="#">Professional Services</a>
+                    <a href="#">Nonprofit</a>
+                    <a href="#">Restaurants</a>
+                </div>
+                
+                <div class="footer-column" data-scroll>
+                    <h3>Resources</h3>
+                    <a href="#">Small Business Blog</a>
+                    <a href="#">Accounting Guides</a>
+                    <a href="#">Business Tools</a>
+                    <a href="#">Webinars</a>
+                    <a href="#">Support</a>
+                </div>
+                
+                <div class="footer-column" data-scroll>
+                    <h3>Company</h3>
+                    <a href="#">About Intuit</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press Center</a>
+                    <a href="#">Security</a>
+                    <a href="#">Contact Us</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom" data-scroll>
+                <div>©2023 Intuit Inc. All rights reserved.</div>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Document fully loaded - initializing script');
+            
+            // Get elements
+            const continueBtn = document.getElementById('continueBtn');
+            if (!continueBtn) {
+                console.error('Continue button not found!');
+                return;
+            }
+            
+            const mainContent = document.querySelector('.main-content');
+            if (!mainContent) {
+                console.error('Main content section not found!');
+                return;
+            }
+            
+            // Form validation function
+            function validateForm() {
+                console.log('Running form validation...');
+                
+                // Check required radio buttons
+                const q1Answered = document.querySelector('input[name="q1"]:checked');
+                const q3Answered = document.querySelector('input[name="q3"]:checked');
+                
+                // Check business type selection
+                const businessTypeSelected = document.querySelector('.option-card.selected');
+                
+                // Enable button only if all required sections are completed
+                const allValid = q1Answered && q3Answered && businessTypeSelected;
+                continueBtn.disabled = !allValid;
+                
+                console.log('Form validation result:', {
+                    q1Answered: !!q1Answered,
+                    q3Answered: !!q3Answered,
+                    businessTypeSelected: !!businessTypeSelected,
+                    allValid: allValid
+                });
+                
+                return allValid;
+            }
+            
+            // Set up event listeners for form inputs
+            document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    console.log('Input changed:', this.name, this.value);
+                    validateForm();
+                });
+            });
+            
+            // Business type card selection
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    console.log('Business type card clicked');
+                    document.querySelectorAll('.option-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    validateForm();
+                });
+            });
+            
+            // Continue button handler
+            continueBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Continue button clicked');
+                
+                if (!validateForm()) {
+                    console.warn('Form not valid - preventing continue');
+                    alert('Please complete all required sections before continuing');
+                    return;
+                }
+                
+                console.log('Hiding questionnaire and showing main content');
+                document.querySelector('.questionnaire-container').style.display = 'none';
+                mainContent.classList.add('visible');
+                
+                // Scroll to top smoothly
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                
+                // Trigger animations after a short delay
+                setTimeout(() => {
+                    handleScrollAnimation();
+                }, 500);
+            });
+            
+            // Scroll animation function
+            function handleScrollAnimation() {
+                console.log('Running scroll animations');
+                const scrollElements = document.querySelectorAll('[data-scroll]');
+                
+                const elementInView = (el) => {
+                    const elementTop = el.getBoundingClientRect().top;
+                    return elementTop <= (window.innerHeight || document.documentElement.clientHeight);
+                };
+                
+                scrollElements.forEach((el) => {
+                    if (elementInView(el)) {
+                        el.setAttribute('data-scroll', 'in');
+                    }
+                });
+            }
+            
+            // Initial validation check
+            validateForm();
+            
+            // Set up scroll listener
+            window.addEventListener('scroll', handleScrollAnimation);
+            
+            console.log('Initialization complete');
+        });
+    </script>
+</body>
+</html>
